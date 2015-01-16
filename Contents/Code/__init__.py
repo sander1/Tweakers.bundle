@@ -1,6 +1,3 @@
-import re
-
-####################################################################################################
 PREFIX = '/video/tweakers'
 NAME = 'Tweakers'
 ICON = 'icon-default.jpg'
@@ -8,6 +5,7 @@ ART = 'art-default.jpg'
 BASE_URL = 'http://tweakers.net/video/'
 MAIN_URL = BASE_URL + 'zoeken/?'
 REVIEW_URL = MAIN_URL + 'i=6&' # i = Video Type filter, 6 is video review id
+RE_DATE = Regex("([0-3][0-9]|[0-9])(\/|-|\.)([0-1][0-9]|[0-9])(\/|-|\.)(19[7-9]\d|2\d\d\d)")
 
 ####################################################################################################
 def Start():
@@ -74,7 +72,6 @@ def Videos(title, url, page=1):
 
 	try:
 		oc = ObjectContainer(title2=title)
-		oc.art = ART_WITH_TEXT
 		content = HTML.ElementFromURL(url + 'page=%s' % page )
 		table = content.xpath('.//table[contains(@class, "listing useVisitedState")]')[0]
 
@@ -188,9 +185,7 @@ def SearchByKeyword(query, url = None):
 @route(PREFIX + '/searchByDate')
 def SearchByDate(query, url = None):
 
-	dateRegex = "([0-3][0-9]|[0-9])(\/|-|\.)([0-1][0-9]|[0-9])(\/|-|\.)(19[7-9]\d|2\d\d\d)"
-
-	result = re.findall(dateRegex, query)
+	result = RE_DATE.findall(query)
 	video_url = MAIN_URL + 'pti=%s&pta=%s&' % (''.join(result[0]), ''.join(result[1]))
 
 	return Videos('Videos', video_url, 1)
