@@ -131,8 +131,8 @@ def Filter(title, url, idKey, filterPrefix):
 	categoryDiv = content.xpath('.//div[contains(@id, "%s")]/div' % idKey)[0]
 
  	for video in categoryDiv.xpath('./ul/li'):
-		categoryId = video.xpath('./label/input/@value')[0]
-		categoryName = video.xpath('./label/span/text()')[0]
+		categoryId = video.xpath('./label/span/input/@value')[0]
+		categoryName = video.xpath('./label/span[contains (@class, "facetLabel")]/text()')[0]
 
 		video_url = url + '%s=%s&' % (filterPrefix, categoryId)
 
@@ -158,8 +158,9 @@ def FilterByDateOrKeyword(title, url):
     		+ '\n' + "1/1/2014 & 1/1/2015" 
     		+ '\n' + "1.1.2014 & 1.1.2015"
     		+ '\n' + 'dd-mm-yyyy & dd-mm-yyyy'
-    		+ '\n\n\n' + "Zoeken op een specifieke datum (voer twee maal dezelfde datum in):" 
-    		+ '\n\n'+ "12-12-2014 & 12-12-2014",
+    		+ '\n\n\n' + "Zoeken op een specifieke datum:" 
+    		+ '\n\n'+ "12-12-2014"
+    		+ '\n'+ "dd-mm-yyyy",
     	thumb = R("search-icon.png")
 	))
 
@@ -186,9 +187,15 @@ def SearchByKeyword(query, url = None):
 def SearchByDate(query, url = None):
 
 	result = RE_DATE.findall(query)
-	video_url = MAIN_URL + 'pti=%s&pta=%s&' % (''.join(result[0]), ''.join(result[1]))
 
-	return Videos('Videos', video_url, 1)
+	if result:
+		if len(result) > 1:
+			video_url = MAIN_URL + 'pti=%s&pta=%s&' % (''.join(result[0]), ''.join(result[1]))
+		else:
+			video_url = MAIN_URL + 'pti=%s&pta=%s&' % (''.join(result[0]), ''.join(result[0]))
+
+		return Videos('Videos', video_url, 1)
+	return ObjectContainer(header="Error", message="Er is geen gelidige datum ingevuld.")
 
 ####################################################################################################
 @route(PREFIX + '/populairVideos', allow_sync=True)
