@@ -2,7 +2,7 @@ PREFIX = '/video/tweakers'
 NAME = 'Tweakers'
 ICON = 'icon-default.jpg'
 ART = 'art-default.jpg'
-BASE_URL = 'http://tweakers.net/video/'
+BASE_URL = 'https://tweakers.net/video/'
 MAIN_URL = BASE_URL + 'zoeken/?'
 REVIEW_URL = MAIN_URL + 'i=6&' # i = Video Type filter, 6 is video review id
 RE_DATE = Regex("([0-3][0-9]|[0-9])(\/|-|\.)([0-1][0-9]|[0-9])(\/|-|\.)(19[7-9]\d|2\d\d\d)")
@@ -14,6 +14,29 @@ def Start():
 
 	HTTP.CacheTime = 300
 	HTTP.Headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36'
+
+	# Handle cookies & create session
+	HTTP.ClearCookies()
+
+	data = HTTP.Request('https://tweakers.net/', cacheTime=0)
+	tnet_id = data.headers['set-cookie'].split('TnetID=.')[-1].split(';')[0]
+
+	tweakers_token = HTML.ElementFromString(data.content).xpath('//input[@name="tweakers_token"]/@value')[0]
+
+	post_values = {
+		'decision': 'accept',
+		'returnTo': 'https://tweakers.net/',
+		'tweakers_token': tweakers_token
+	}
+
+	post_headers = {
+		'Cookie': 'TnetID=.%s' % (tnet_id)
+	}
+
+	headers = HTTP.Request('https://secure.tweakers.net/my.tnet/cookies/', values=post_values, headers=post_headers).headers
+	tc = headers['set-cookie'].split('tc=')[-1].split(';')[0]
+
+	HTTP.Headers['Cookie'] = 'TnetID=%s; tc=%s' % (tnet_id, tc)
 
 ####################################################################################################
 @handler(PREFIX, NAME, thumb=ICON, art=ART)
