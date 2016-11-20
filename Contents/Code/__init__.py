@@ -13,7 +13,7 @@ def Start():
 	ObjectContainer.title1 = NAME
 
 	HTTP.CacheTime = 300
-	HTTP.Headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36'
+	HTTP.Headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.98 Safari/537.36'
 
 	# Handle cookies & create session
 	HTTP.ClearCookies()
@@ -21,11 +21,14 @@ def Start():
 	data = HTTP.Request('https://tweakers.net/', cacheTime=0)
 	tnet_id = data.headers['set-cookie'].split('TnetID=.')[-1].split(';')[0]
 
+	return_to = HTML.ElementFromString(data.content).xpath('//input[@name="returnTo"]/@value')[0]
+	fragment = HTML.ElementFromString(data.content).xpath('//input[@name="fragment"]/@value')[0]
 	tweakers_token = HTML.ElementFromString(data.content).xpath('//input[@name="tweakers_token"]/@value')[0]
 
 	post_values = {
 		'decision': 'accept',
-		'returnTo': 'https://tweakers.net/',
+		'returnTo': return_to,
+		'fragment': fragment,
 		'tweakers_token': tweakers_token
 	}
 
@@ -33,7 +36,7 @@ def Start():
 		'Cookie': 'TnetID=.%s' % (tnet_id)
 	}
 
-	headers = HTTP.Request('https://secure.tweakers.net/my.tnet/cookies/', values=post_values, headers=post_headers).headers
+	headers = HTTP.Request('https://tweakers.net/my.tnet/cookies/', values=post_values, headers=post_headers).headers
 	tc = headers['set-cookie'].split('tc=')[-1].split(';')[0]
 
 	HTTP.Headers['Cookie'] = 'TnetID=%s; tc=%s' % (tnet_id, tc)
