@@ -229,22 +229,21 @@ def PopulairVideos(title, url):
 
 	oc = ObjectContainer(title2=title)
 	content = HTML.ElementFromURL(url)
-	table = content.xpath('.//div[contains(@class, "portalFpaItems portalBlock")]/div')[0]
+	table = content.xpath('.//div[contains(@class, "videoPortalFpaItems portalBlock")]/div')[0]
 
-	for video in table.xpath('./div'):
+	for video in table.xpath('.//div[@class="fpaItem"]'):
 
-		path = './a[contains(@class, "fpaTitle")]/'
-		video_url = video.xpath(path + '@href')[0]
-		video_title = video.xpath(path + 'h2/text()')[0]
-		video_summary = video.xpath(path + 'p/text()')[0]
+		video_url = video.xpath('./a/@href')[0]
+		video_title = video.xpath('.//h2/text()')[0]
+		video_summary = video.xpath('.//p/text()')[0]
 
-		video_img = video.xpath('./a[contains(@class, "fpaImageContainer")]/div/img/@src')[0]		
+		video_img = video.xpath('.//img/@src')[0]
 
 		oc.add(VideoClipObject(
 			url = video_url,
 			title = video_title,
 			summary = video_summary,
-			thumb = Resource.ContentsOfURLWithFallback(video_img),
+			thumb = Resource.ContentsOfURLWithFallback(video_img)
 		))
 
 	if len(oc) < 1:
